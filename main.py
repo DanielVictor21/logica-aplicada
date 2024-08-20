@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
@@ -15,7 +16,7 @@ def llm_call(question):
     client = OpenAI(api_key=API_KEY)
     prompt = """
         Você precisará analisar uma frase, dividida entre hipótese e tese. /
-        Depois, você precisará classficar o argumento em quatro tipos: Dedutivo válido, Dedutivo inválido, Indutivo Fraco e Indutivo forte. /
+        Depois, você precisará classficar o argumento em quatro tipos: 1- Dedutivo válido, 2- Dedutivo inválido, 3- Indutivo Fraco e 4- Indutivo forte. O primeiro caractere da sua resposta deve ser o código referente ao tipo. /
         Exemplos:
         Dedutivo Válido = 'Baleia é mamífero; Mamífero não é peixe. Logo a baleia não é peixe.' /
         Dedutivo Inválido = 'Os baianos gostam de carnaval; Eu gosto de carnaval. Logo eu sou baiana.' /
@@ -33,20 +34,28 @@ def llm_call(question):
         ]
     )
     response_content = response.choices[0].message.content
+    arg_type_mapping = {
+         '1': 'Dedutivo válido',
+         '2': 'Dedutivo inválido',
+         '3': 'Indutivo Fraco',
+         '4': 'Indutivo Forte'
+    }
+    arg_type = arg_type_mapping[response_content[0]]
     
-    return response_content
+    return arg_type, response_content
 
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# templates = Jinja2Templates(directory="templates")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/", response_class=HTMLResponse)
-async def read_home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+# @app.get("/", response_class=HTMLResponse)
+# async def read_home(request: Request):
+#     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/send", response_class=HTMLResponse)
 async def receive_form(request: Request, prompt: str = Form(...)):
-        response = llm_call(prompt)
-        return templates.TemplateResponse("index.html", {"response": response})
+        response, arg_type = llm_call(prompt)
+        return JSONResponse(content={"response": response, "arg_type": arg_type})
+        # return templates.TemplateResponse("index.html", {"response": response})
 
 if __name__ == "__main__":
     import uvicorn
