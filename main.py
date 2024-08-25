@@ -16,12 +16,10 @@ def llm_call(question):
     client = OpenAI(api_key=API_KEY)
     prompt = """
         Você precisará analisar uma frase, dividida entre hipótese e tese. /
-        Depois, você precisará classficar o argumento em quatro tipos: 1- Dedutivo válido, 2- Dedutivo inválido, 3- Indutivo Fraco e 4- Indutivo forte. O primeiro caractere da sua resposta deve ser o código referente ao tipo. /
+        Depois, você precisará classficar o argumento em dois tipos: 1- Dedutivo válido, 2- Dedutivo inválido. O primeiro caractere da sua resposta deve ser o código referente ao tipo. /
         Exemplos:
         Dedutivo Válido = 'Baleia é mamífero; Mamífero não é peixe. Logo a baleia não é peixe.' /
         Dedutivo Inválido = 'Os baianos gostam de carnaval; Eu gosto de carnaval. Logo eu sou baiana.' /
-        Indutivo Forte = 'Se fiz o teste da vacina com ratos e funcionou; fiz o mesmo teste com macacos e funcionou; fiz com outros mamíferos e também funcionou, Então a vacina deve funcionar com seres humanos.'/
-        Indutivo Fraco = 'Se ontem fui pescar no rio e peguei uma sardinha; hoje fui novamene e pesquei mais sardinhas; Então nesse rio só tem sardinhas.' /
         Logo, analise a SINTAXE e a SEMÂNTICA de cada frase, e sua resposta será um desses tipos de argumentos.
         """
     response = client.chat.completions.create(
@@ -36,9 +34,7 @@ def llm_call(question):
     response_content = response.choices[0].message.content
     arg_type_mapping = {
          '1': 'Dedutivo válido',
-         '2': 'Dedutivo inválido',
-         '3': 'Indutivo Fraco',
-         '4': 'Indutivo Forte'
+         '2': 'Dedutivo inválido'
     }
     arg_type = arg_type_mapping[response_content[0]]
     

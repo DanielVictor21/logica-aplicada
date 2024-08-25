@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
 from openai import OpenAI
 import streamlit as st
 
@@ -14,13 +13,12 @@ else:
         client = OpenAI(api_key=API_KEY)
         prompt = """
             Você precisará analisar uma frase, dividida entre hipótese e tese. /
-            Depois, você precisará classficar o argumento em quatro tipos: Dedutivo válido, Dedutivo inválido, Indutivo Fraco e Indutivo forte. /
+            Depois, você precisará classficar o argumento em dois tipos: Dedutivo válido, Dedutivo inválido. /
             Exemplos:
             Dedutivo Válido = 'Baleia é mamífero; Mamífero não é peixe. Logo a baleia não é peixe.' /
             Dedutivo Inválido = 'Os baianos gostam de carnaval; Eu gosto de carnaval. Logo eu sou baiana.' /
-            Indutivo Forte = 'Se fiz o teste da vacina com ratos e funcionou; fiz o mesmo teste com macacos e funcionou; fiz com outros mamíferos e também funcionou, Então a vacina deve funcionar com seres humanos.'/
-            Indutivo Fraco = 'Se ontem fui pescar no rio e peguei uma sardinha; hoje fui novamente e pesquei mais sardinhas; Então nesse rio só tem sardinhas.' /
-            Logo, analise a SINTAXE e a SEMÂNTICA de cada frase, e sua resposta será um desses tipos de argumentos.
+            Logo, analise a SINTAXE e a SEMÂNTICA de cada frase, e sua resposta será um desses tipos de argumentos. /
+            apresente os símbolos de predicado quando possível.
             """
         response = client.chat.completions.create(
             model="gpt-4o",
@@ -35,7 +33,7 @@ else:
         
         return response
 
-    st.title("Classificação de Argumentos Lógicos")
+    st.title("Lógica de Predicado: Validade")
     question = st.text_area("Digite a frase que deseja analisar:")
 
     if st.button("Classificar Argumento"):
